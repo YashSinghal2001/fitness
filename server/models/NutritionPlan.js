@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const nutritionPlanSchema = new mongoose.Schema({
-  clientId: {
+  client: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
@@ -62,7 +62,7 @@ const nutritionPlanSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-nutritionPlanSchema.index({ clientId: 1, checkInDate: -1 });
+nutritionPlanSchema.index({ client: 1, checkInDate: -1 });
 
 // Validation: Macro totals equal daily target
 nutritionPlanSchema.pre('save', async function () {

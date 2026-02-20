@@ -15,10 +15,14 @@ const clientRoutes = require('./routes/clientRoutes');
 const dailyLogRoutes = require('./routes/dailyLogRoutes');
 const nutritionRoutes = require('./routes/nutritionRoutes');
 const photoRoutes = require('./routes/photoRoutes');
+const userRoutes = require('./routes/userRoutes');
+const goalRoutes = require('./routes/goalRoutes');
+const workoutRoutes = require('./routes/workoutRoutes');
+const progressRoutes = require('./routes/progressRoutes');
 
 // Controller Imports for specific route mounting
-const { getReportingStats, getBodyMeasurements, updateBodyMeasurements } = require('./controllers/progressController');
 const { getClientReports } = require('./controllers/clientController');
+const { protect } = require('./middleware/authMiddleware');
 
 // Middleware Imports
 const { errorHandler } = require('./middleware/errorMiddleware');
@@ -95,25 +99,19 @@ app.use(cookieParser());
 // );
 
 // Route Mounting
+app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/client', clientRoutes);
 app.use('/api/daily', dailyLogRoutes);
 app.use('/api/nutrition', nutritionRoutes);
 app.use('/api/photos', photoRoutes);
+app.use('/api/goals', goalRoutes);
+app.use('/api/workouts', workoutRoutes);
+app.use('/api/progress', progressRoutes);
 
 // Custom Route Mounting to match specific requirements
 // /api/weekly -> Client Reports (Weekly Summaries)
-app.get('/api/weekly', getClientReports);
-
-// /api/measurements -> Progress Controller (Get/Update)
-const measurementsRouter = express.Router();
-measurementsRouter.route('/')
-  .get(getBodyMeasurements)
-  .put(updateBodyMeasurements);
-app.use('/api/measurements', measurementsRouter);
-
-// /api/reports -> Progress Controller (Reporting Stats)
-app.get('/api/reports', getReportingStats);
+app.get('/api/weekly', protect, getClientReports);
 
 // Root Route
 app.get('/', (req, res) => {

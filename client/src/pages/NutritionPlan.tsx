@@ -21,7 +21,7 @@ interface Meal {
 
 interface NutritionPlanData {
   _id?: string;
-  clientId: string;
+  client?: string;
   clientName: string;
   planType: string;
   period: string;
@@ -56,8 +56,8 @@ const defaultMeals = [
 
 const NutritionPlan = () => {
   const { clientId } = useParams<{ clientId: string }>();
-  // Use clientId from params or default to a fixed ID for the single-user mode
-  const targetClientId = clientId || '507f1f77bcf86cd799439011';
+  const role = localStorage.getItem('role');
+  const isAdmin = role === 'admin';
 
   const [plan, setPlan] = useState<NutritionPlanData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,7 +65,6 @@ const NutritionPlan = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   const emptyPlan: NutritionPlanData = {
-    clientId: targetClientId || '',
     clientName: '',
     planType: 'Fat Loss',
     period: 'Week 1-4',
@@ -101,15 +100,33 @@ const NutritionPlan = () => {
   };
 
   useEffect(() => {
-    if (targetClientId) {
-      fetchPlan();
-    }
-  }, [targetClientId]);
+    fetchPlan();
+  }, [clientId]);
 
   const fetchPlan = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/nutrition/${targetClientId}`);
+      let response;
+      
+      if (isAdmin && clientId) {
+          // Admin viewing client
+          // We can use getClientById to get nutrition plan
+          const clientRes = await api.get(`/admin/client/${clientId}`);
+          // The response structure is { client, nutritionPlan, ... }
+          if (clientRes.data.nutritionPlan) {
+              response = { data: clientRes.data.nutritionPlan };
+          } else {
+              // No plan exists
+              setPlan({...emptyPlan, clientName: clientRes.data.client.name});
+              setIsEditing(true); // Auto edit mode for new plan
+              setLoading(false);
+              return;
+          }
+      } else {
+          // Client viewing own plan
+          response = await api.get('/client/nutrition');
+      }
+
       const fetchedPlan = response.data;
       if (fetchedPlan.checkInDate) {
         fetchedPlan.checkInDate = new Date(fetchedPlan.checkInDate).toISOString().split('T')[0];
@@ -118,7 +135,7 @@ const NutritionPlan = () => {
     } catch (err: any) {
       if (err.response && err.response.status === 404) {
         setPlan(emptyPlan);
-        setIsEditing(true);
+        if (isAdmin) setIsEditing(true);
       } else {
         setError('Failed to fetch nutrition plan');
         console.error(err);
@@ -131,7 +148,18 @@ const NutritionPlan = () => {
   const handleSave = async () => {
     try {
       if (!plan) return;
-      const response = await api.post('/nutrition', plan);
+      
+      let response;
+      if (isAdmin && clientId) {
+          response = await api.put(`/admin/client/${clientId}/nutrition`, plan);
+      } else {
+          // Client shouldn't be able to save usually, but if enabled:
+          // We don't have a route for client to update own plan in requirements.
+          // So this might fail or we should disable save for client.
+          setError("Only admin can update plan");
+          return;
+      }
+      
       setPlan(response.data);
       setIsEditing(false);
       setError(null);
@@ -188,15 +216,17 @@ const NutritionPlan = () => {
     <div className="max-w-5xl mx-auto space-y-8 pb-12">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold text-highlight">Nutrition Plan</h2>
-        <button
-          onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-            isEditing ? 'bg-success/80 hover:bg-success text-background font-bold' : 'btn-primary'
-          }`}
-        >
-          {isEditing ? <Save size={20} /> : <Edit size={20} />}
-          <span>{isEditing ? 'Save Plan' : 'Edit Plan'}</span>
-        </button>
+        {isAdmin && (
+            <button
+            onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                isEditing ? 'bg-success/80 hover:bg-success text-background font-bold' : 'btn-primary'
+            }`}
+            >
+            {isEditing ? <Save size={20} /> : <Edit size={20} />}
+            <span>{isEditing ? 'Save Plan' : 'Edit Plan'}</span>
+            </button>
+        )}
       </div>
 
       {error && (

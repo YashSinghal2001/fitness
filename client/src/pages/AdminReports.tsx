@@ -29,7 +29,7 @@ const AdminReports = () => {
         {reports.map((report) => (
           <div key={report._id} className="bg-surface p-4 rounded-lg shadow-lg border border-gray-800">
             <div className="flex justify-between items-center mb-2">
-              <h3 className="text-xl font-bold">{report.clientId?.name || 'Unknown Client'}</h3>
+              <h3 className="text-xl font-bold">{report.client?.name || 'Unknown Client'}</h3>
               <span className="text-sm text-text-muted">{new Date(report.date).toLocaleDateString()}</span>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">

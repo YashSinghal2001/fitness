@@ -1,23 +1,152 @@
 const User = require('../models/User');
 const DailyLog = require('../models/DailyLog');
-
-const DEFAULT_COACH_ID = "507f1f77bcf86cd799439012";
+const NutritionPlan = require('../models/NutritionPlan');
+const WorkoutPlan = require('../models/WorkoutPlan');
+const Goal = require('../models/Goal');
 
 // @desc    Get all clients for the logged in admin
 // @route   GET /api/admin/clients
-// @access  Public (Temporary)
+// @access  Private (Admin)
 const getClients = async (req, res) => {
   try {
-    const clients = await User.find({ role: 'client', coach: DEFAULT_COACH_ID }).select('-password');
+    const clients = await User.find({ role: 'client', coach: req.user._id }).select('-password');
     res.json(clients);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
 };
 
+// @desc    Get client full profile (details, nutrition, workout plan)
+// @route   GET /api/admin/client/:id
+// @access  Private (Admin)
+const getClientById = async (req, res) => {
+    try {
+        const client = await User.findById(req.params.id).select('-password');
+
+        if (!client) {
+            return res.status(404).json({ message: 'Client not found' });
+        }
+
+        // Check if client belongs to admin
+        if (client.coach.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Not authorized to view this client' });
+        }
+
+        const nutritionPlan = await NutritionPlan.findOne({ client: client._id }).sort({ createdAt: -1 });
+        const workoutPlan = await WorkoutPlan.findOne({ client: client._id }).sort({ createdAt: -1 });
+        const goals = await Goal.find({ client: client._id, completed: false });
+        const recentLogs = await DailyLog.find({ client: client._id }).sort({ date: -1 }).limit(7);
+
+        res.json({
+            client,
+            nutritionPlan,
+            workoutPlan,
+            goals,
+            recentLogs
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+}
+
+// @desc    Update client nutrition plan
+// @route   PUT /api/admin/client/:id/nutrition
+// @access  Private (Admin)
+const updateClientNutrition = async (req, res) => {
+    try {
+        const client = await User.findById(req.params.id);
+
+        if (!client) {
+            return res.status(404).json({ message: 'Client not found' });
+        }
+
+        if (client.coach.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Not authorized to update this client' });
+        }
+
+        const {
+            clientName,
+            planType,
+            period,
+            checkInDate,
+            cardio,
+            water,
+            salt,
+            meals,
+            dailyMacroTargets
+        } = req.body;
+
+        // Check if plan exists, update or create new
+        // Usually plans are replaced or a new version is created. Let's create a new one to keep history or update existing active one.
+        // For simplicity, let's update the latest one or create if not exists.
+        // Actually, creating a new one is safer for history. But let's follow standard "update" pattern if ID is provided, or create if not.
+        // Since the route is PUT /api/admin/client/:id/nutrition, it implies updating the client's current nutrition.
+        
+        // Let's see if we should create a new record or update the latest.
+        // If we update, we lose history. If we create new, we keep history.
+        // Let's create a new record as "Current Plan".
+        
+        const newPlan = new NutritionPlan({
+            client: client._id,
+            clientName: clientName || client.name,
+            planType,
+            period,
+            checkInDate,
+            cardio,
+            water,
+            salt,
+            meals,
+            dailyMacroTargets
+        });
+
+        const savedPlan = await newPlan.save();
+        res.json(savedPlan);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+}
+
+// @desc    Update client workout plan
+// @route   PUT /api/admin/client/:id/workout
+// @access  Private (Admin)
+const updateClientWorkout = async (req, res) => {
+    try {
+        const client = await User.findById(req.params.id);
+
+        if (!client) {
+            return res.status(404).json({ message: 'Client not found' });
+        }
+
+        if (client.coach.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Not authorized to update this client' });
+        }
+
+        const { title, description, schedule, notes } = req.body;
+
+        const newPlan = new WorkoutPlan({
+            client: client._id,
+            title,
+            description,
+            schedule,
+            notes
+        });
+
+        const savedPlan = await newPlan.save();
+        res.json(savedPlan);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+}
+
+
 // @desc    Create a new client
 // @route   POST /api/admin/clients
-// @access  Public (Temporary)
+// @access  Private (Admin)
 const createClient = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -34,7 +163,7 @@ const createClient = async (req, res) => {
       email,
       password, // Password will be hashed by model pre-save
       role: 'client',
-      coach: DEFAULT_COACH_ID,
+      coach: req.user._id,
     });
 
     if (user) {
@@ -48,18 +177,24 @@ const createClient = async (req, res) => {
       res.status(400).json({ message: 'Invalid user data' });
     }
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
 };
 
 // @desc    Update client details (e.g. activate/deactivate)
 // @route   PUT /api/admin/clients/:id
-// @access  Public (Temporary)
+// @access  Private (Admin)
 const updateClient = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
 
     if (user) {
+      // Check authorization
+      if (user.coach.toString() !== req.user._id.toString()) {
+          return res.status(403).json({ message: 'Not authorized' });
+      }
+
       user.name = req.body.name || user.name;
       user.email = req.body.email || user.email;
       if (req.body.password) {
@@ -82,34 +217,39 @@ const updateClient = async (req, res) => {
       res.status(404).json({ message: 'User not found' });
     }
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
 };
 
 // @desc    Delete client
 // @route   DELETE /api/admin/clients/:id
-// @access  Public (Temporary)
+// @access  Private (Admin)
 const deleteClient = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
 
     if (user) {
+      if (user.coach.toString() !== req.user._id.toString()) {
+          return res.status(403).json({ message: 'Not authorized' });
+      }
       await user.deleteOne();
       res.json({ message: 'User removed' });
     } else {
       res.status(404).json({ message: 'User not found' });
     }
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
 };
 
 // @desc    Get aggregated analytics for admin
 // @route   GET /api/admin/analytics
-// @access  Public (Temporary)
+// @access  Private (Admin)
 const getAdminAnalytics = async (req, res) => {
     try {
-        const adminId = DEFAULT_COACH_ID;
+        const adminId = req.user._id;
         
         // Count total clients
         const totalClients = await User.countDocuments({ role: 'client', coach: adminId });
@@ -126,7 +266,7 @@ const getAdminAnalytics = async (req, res) => {
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         
         const recentLogs = await DailyLog.countDocuments({
-            clientId: { $in: clientIds },
+            client: { $in: clientIds },
             createdAt: { $gte: sevenDaysAgo }
         });
 
@@ -136,38 +276,43 @@ const getAdminAnalytics = async (req, res) => {
             recentLogs
         });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Server Error' });
     }
 }
 
 // @desc    Get recent reports from all clients
 // @route   GET /api/admin/reports
-// @access  Public (Temporary)
+// @access  Private (Admin)
 const getAllReports = async (req, res) => {
     try {
-        const adminId = DEFAULT_COACH_ID;
+        const adminId = req.user._id;
         const clients = await User.find({ role: 'client', coach: adminId }).select('_id name');
         const clientIds = clients.map(c => c._id);
 
         // Get logs from last 7 days for these clients
         const logs = await DailyLog.find({
-            clientId: { $in: clientIds }
+            client: { $in: clientIds }
         })
         .sort({ date: -1 })
-        .populate('clientId', 'name email')
+        .populate('client', 'name email')
         .limit(50); // Limit to recent 50 logs
 
         res.json(logs);
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Server Error' });
     }
 }
 
 module.exports = {
   getClients,
+  getClientById,
   createClient,
   updateClient,
   deleteClient,
   getAdminAnalytics,
-  getAllReports
+  getAllReports,
+  updateClientNutrition,
+  updateClientWorkout
 };

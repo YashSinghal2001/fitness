@@ -1,25 +1,38 @@
-import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Dumbbell, TrendingUp, Target, User, Users, BarChart2, Calendar, Utensils, Ruler, Camera } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Dumbbell, TrendingUp, Target, User, Users, BarChart2, Calendar, Utensils, Ruler, Camera, LogOut } from 'lucide-react';
 import clsx from 'clsx';
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const role = localStorage.getItem('role');
 
-  const navItems = [
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    navigate('/login');
+  };
+
+  const clientNavItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Daily Tracking', path: '/daily', icon: Calendar },
     { name: 'Workouts', path: '/workouts', icon: Dumbbell },
     { name: 'Progress', path: '/progress', icon: TrendingUp },
     { name: 'Photo Comparison', path: '/photos/compare', icon: Camera },
     { name: 'Body Measurements', path: '/measurements', icon: Ruler },
-    { name: 'Reporting', path: '/reporting', icon: BarChart2 },
     { name: 'Nutrition Plan', path: '/nutrition', icon: Utensils },
     { name: 'Goals', path: '/goals', icon: Target },
-    // Admin features accessible to everyone now
-    { name: 'Clients Management', path: '/admin/clients', icon: Users },
-    { name: 'Overall Analytics', path: '/admin/analytics', icon: BarChart2 },
     { name: 'Profile', path: '/profile', icon: User },
   ];
+
+  const adminNavItems = [
+    { name: 'Clients Management', path: '/admin/clients', icon: Users },
+    { name: 'Overall Analytics', path: '/admin/analytics', icon: BarChart2 },
+    { name: 'Reports', path: '/admin/reports', icon: TrendingUp },
+    { name: 'Profile', path: '/profile', icon: User },
+  ];
+
+  const navItems = role === 'admin' ? adminNavItems : clientNavItems;
 
   return (
     <div className="h-screen w-64 bg-[#1E1E4B] border-r border-border flex flex-col fixed left-0 top-0">
@@ -48,6 +61,14 @@ const Sidebar = () => {
             </Link>
           );
         })}
+        
+        <button
+          onClick={handleLogout}
+          className="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors text-secondary hover:bg-critical/20 hover:text-critical w-full text-left mt-auto"
+        >
+          <LogOut size={20} />
+          <span className="font-medium">Logout</span>
+        </button>
       </nav>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Utensils } from 'lucide-react';
+import { Utensils, User } from 'lucide-react';
 import api from '../services/api';
 
 const ClientsList = () => {
@@ -63,14 +63,24 @@ const ClientsList = () => {
                     </button>
                   </td>
                   <td className="p-3">
-                    <Link 
-                        to={`/admin/clients/${client._id}/nutrition`}
-                        className="flex items-center space-x-1 text-primary hover:text-primary/80"
-                        title="Nutrition Plan"
-                    >
-                        <Utensils size={18} />
-                        <span className="text-sm">Plan</span>
-                    </Link>
+                    <div className="flex space-x-2">
+                      <Link 
+                          to={`/admin/clients/${client._id}`}
+                          className="flex items-center space-x-1 text-primary hover:text-primary/80"
+                          title="View Profile"
+                      >
+                          <User size={18} />
+                          <span className="text-sm">Profile</span>
+                      </Link>
+                      <Link 
+                          to={`/admin/clients/${client._id}/nutrition`}
+                          className="flex items-center space-x-1 text-secondary hover:text-secondary/80"
+                          title="Nutrition Plan"
+                      >
+                          <Utensils size={18} />
+                          <span className="text-sm">Plan</span>
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

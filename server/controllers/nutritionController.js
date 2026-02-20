@@ -3,7 +3,7 @@ const User = require('../models/User');
 
 // @desc    Create a new nutrition plan
 // @route   POST /api/nutrition
-// @access  Public (Temporary)
+// @access  Private (Admin)
 const createNutritionPlan = async (req, res) => {
   try {
     const {
@@ -19,12 +19,20 @@ const createNutritionPlan = async (req, res) => {
       dailyMacroTargets
     } = req.body;
 
-    // Validate client exists (optional now, but good to keep)
-    // const client = await User.findById(clientId);
+    // Validate client exists
+    const client = await User.findById(clientId);
+    if (!client) {
+        return res.status(404).json({ message: 'Client not found' });
+    }
+
+    // Check authorization: only admin/coach can create plans
+    if (req.user.role !== 'admin' || (client.coach && client.coach.toString() !== req.user._id.toString())) {
+        return res.status(403).json({ message: 'Not authorized to create plan for this client' });
+    }
     
     const nutritionPlan = new NutritionPlan({
-      clientId,
-      clientName, 
+      client: clientId,
+      clientName: clientName || client.name,
       planType,
       period,
       checkInDate,
@@ -49,14 +57,29 @@ const createNutritionPlan = async (req, res) => {
 
 // @desc    Get nutrition plan by client ID
 // @route   GET /api/nutrition/:clientId
-// @access  Public (Temporary)
+// @access  Private
 const getNutritionPlanByClientId = async (req, res) => {
   try {
     const { clientId } = req.params;
     
-    // Auth check removed
+    // Auth check
+    if (req.user.role === 'client') {
+        if (clientId !== 'me' && clientId !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Not authorized' });
+        }
+    } else if (req.user.role === 'admin') {
+        const client = await User.findById(clientId);
+        if (!client) {
+             return res.status(404).json({ message: 'Client not found' });
+        }
+        if (client.coach && client.coach.toString() !== req.user._id.toString()) {
+             return res.status(403).json({ message: 'Not authorized' });
+        }
+    }
 
-    const plan = await NutritionPlan.findOne({ clientId }).sort({ createdAt: -1 });
+    const targetId = clientId === 'me' ? req.user._id : clientId;
+
+    const plan = await NutritionPlan.findOne({ client: targetId }).sort({ createdAt: -1 });
 
     if (!plan) {
       return res.status(404).json({ message: 'Nutrition plan not found' });

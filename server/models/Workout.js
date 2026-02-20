@@ -9,7 +9,7 @@ const exerciseSchema = new mongoose.Schema({
 });
 
 const workoutSchema = new mongoose.Schema({
-  userId: {
+  client: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'User',
@@ -35,7 +35,7 @@ const workoutSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-workoutSchema.index({ userId: 1, workoutDate: -1 });
+workoutSchema.index({ client: 1, workoutDate: -1 });
 
 const Workout = mongoose.model('Workout', workoutSchema);
 

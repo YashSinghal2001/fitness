@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const bodyMeasurementSchema = new mongoose.Schema({
-  userId: {
+  client: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'User',
@@ -23,7 +23,7 @@ const bodyMeasurementSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-bodyMeasurementSchema.index({ userId: 1, date: -1 });
+bodyMeasurementSchema.index({ client: 1, date: -1 });
 
 const BodyMeasurement = mongoose.model('BodyMeasurement', bodyMeasurementSchema);
 

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const goalSchema = new mongoose.Schema({
-  userId: {
+  client: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'User',
@@ -42,7 +42,7 @@ const goalSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-goalSchema.index({ userId: 1, completed: 1 });
+goalSchema.index({ client: 1, completed: 1 });
 
 const Goal = mongoose.model('Goal', goalSchema);
 

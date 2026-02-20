@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const progressPhotoSchema = new mongoose.Schema({
-  userId: {
+  client: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'User',
@@ -27,7 +27,7 @@ const progressPhotoSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-progressPhotoSchema.index({ userId: 1, date: -1 });
+progressPhotoSchema.index({ client: 1, date: -1 });
 
 const ProgressPhoto = mongoose.model('ProgressPhoto', progressPhotoSchema);
 

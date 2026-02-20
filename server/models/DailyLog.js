@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const dailyLogSchema = new mongoose.Schema({
-  clientId: {
+  client: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
@@ -52,7 +52,7 @@ const dailyLogSchema = new mongoose.Schema({
 });
 
 // Compound index to ensure one log per day per client
-dailyLogSchema.index({ clientId: 1, date: 1 }, { unique: true });
+dailyLogSchema.index({ client: 1, date: 1 }, { unique: true });
 
 const DailyLog = mongoose.model('DailyLog', dailyLogSchema);
 

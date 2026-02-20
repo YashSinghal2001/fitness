@@ -1,15 +1,13 @@
 const Goal = require('../models/Goal');
 
-const DEFAULT_CLIENT_ID = "507f1f77bcf86cd799439011";
-
 // @desc    Create new goal
 // @route   POST /api/goals
-// @access  Public (Temporary)
+// @access  Private (Client)
 const createGoal = async (req, res) => {
   const { title, description, targetValue, currentValue, deadline, category } = req.body;
 
   const goal = await Goal.create({
-    userId: DEFAULT_CLIENT_ID,
+    client: req.user._id,
     title,
     description,
     targetValue,
@@ -23,15 +21,15 @@ const createGoal = async (req, res) => {
 
 // @desc    Get goals
 // @route   GET /api/goals
-// @access  Public (Temporary)
+// @access  Private (Client)
 const getGoals = async (req, res) => {
-  const goals = await Goal.find({ userId: DEFAULT_CLIENT_ID }).sort({ deadline: 1 });
+  const goals = await Goal.find({ client: req.user._id }).sort({ deadline: 1 });
   res.json(goals);
 };
 
 // @desc    Update goal
 // @route   PUT /api/goals/:id
-// @access  Public (Temporary)
+// @access  Private (Client)
 const updateGoal = async (req, res) => {
   const goal = await Goal.findById(req.params.id);
 
@@ -40,7 +38,11 @@ const updateGoal = async (req, res) => {
     throw new Error('Goal not found');
   }
 
-  // Auth check removed
+  // Ensure user owns the goal
+  if (goal.client.toString() !== req.user._id.toString()) {
+      res.status(401);
+      throw new Error('Not authorized');
+  }
 
   const updatedGoal = await Goal.findByIdAndUpdate(req.params.id, req.body, {
     new: true,

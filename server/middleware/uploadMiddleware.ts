@@ -1,13 +1,18 @@
 import multer from 'multer';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import cloudinary from '../utils/cloudinary';
+
+// Important: require full module
+const MulterCloudinary = require('multer-storage-cloudinary');
+
+// Access constructor correctly
+const CloudinaryStorage = MulterCloudinary.CloudinaryStorage;
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'gym-progress',
     allowed_formats: ['jpg', 'png', 'jpeg'],
-  } as any,
+  },
 });
 
 const upload = multer({ storage });

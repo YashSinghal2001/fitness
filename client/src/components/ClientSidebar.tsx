@@ -1,15 +1,20 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Dumbbell, TrendingUp, Target, User, Users, BarChart2, Calendar, Utensils, Ruler, Camera, LogOut } from 'lucide-react';
 import clsx from 'clsx';
+import { useAuth } from '../context/AuthContext';
+import { logout as apiLogout } from '../services/api';
 
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const role = localStorage.getItem('role');
+  const { user, setUser } = useAuth();
+  
+  // Fallback to localStorage if user context is not yet ready (though loading check in App.tsx handles this usually)
+  const role = user?.role || localStorage.getItem('role');
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
+    apiLogout();
+    setUser(null);
     navigate('/login');
   };
 

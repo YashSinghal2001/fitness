@@ -1,11 +1,12 @@
 import { User as UserIcon } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Profile = () => {
-  const user = {
-    name: 'Default User',
-    email: 'user@example.com',
-    role: 'client'
-  };
+  const { user } = useAuth();
+
+  if (!user) {
+    return <div>Loading profile...</div>;
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">

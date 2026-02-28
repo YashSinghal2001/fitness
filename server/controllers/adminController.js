@@ -177,11 +177,7 @@ const createClient = async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     // Send email
-    const resetUrl = `${req.protocol}://${req.get('host')}/reset-password/${resetToken}`; 
-    // Wait, the requirement says: `https://your-frontend-domain.com/reset-password/<rawToken>`
-    // I should use an environment variable for frontend URL or infer it. 
-    // Since frontend is Vercel, I should probably use process.env.FRONTEND_URL.
-    
+    // Use FRONTEND_URL from env, or fallback to request origin if not available
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     const resetLink = `${frontendUrl}/reset-password/${resetToken}`;
 
@@ -203,15 +199,16 @@ const createClient = async (req, res) => {
         message,
       });
 
+      // Return only success message, NOT the password
       res.status(201).json({
-        message: "Client created and email sent",
+        message: "Client created and email sent successfully",
       });
     } catch (err) {
       user.passwordResetToken = undefined;
       user.passwordResetExpires = undefined;
       await user.save({ validateBeforeSave: false });
 
-      return res.status(500).json({ message: 'There was an error sending the email. Try again later!' });
+      return res.status(500).json({ message: 'Client created but email failed to send. Please reset password manually.' });
     }
   } catch (error) {
     console.error(error);

@@ -22,7 +22,7 @@ api.interceptors.request.use(
 
 // Auth API calls
 export const register = async (userData: any) => {
-  const response = await api.post('/auth/register', userData);
+  const response = await api.post('api/auth/register', userData);
   if (response.data) {
     localStorage.setItem('token', response.data.token);
     localStorage.setItem('role', response.data.role);
@@ -32,7 +32,7 @@ export const register = async (userData: any) => {
 };
 
 export const registerAdmin = async (userData: any) => {
-  const response = await api.post('/auth/admin/register', userData);
+  const response = await api.post('api/auth/admin/register', userData);
   if (response.data) {
     localStorage.setItem('token', response.data.token);
     localStorage.setItem('role', response.data.role);

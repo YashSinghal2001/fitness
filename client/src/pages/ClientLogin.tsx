@@ -101,18 +101,6 @@ const ClientLogin = () => {
             {loading ? 'Logging In...' : 'Log In'}
           </button>
         </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-muted">
-            Don't have an account?{' '}
-            <Link
-              to="/register"
-              className="font-medium text-highlight hover:text-white transition-colors"
-            >
-              Register here
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
   );

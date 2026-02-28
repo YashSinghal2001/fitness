@@ -1,6 +1,6 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import ClientLogin from './pages/ClientLogin';
-import ClientRegister from './pages/ClientRegister';
+// import ClientRegister from './pages/ClientRegister';
 import AdminLogin from './pages/AdminLogin';
 import AdminRegister from './pages/AdminRegister';
 import ClientDashboard from './pages/ClientDashboard';
@@ -17,15 +17,36 @@ import ClientsList from './pages/ClientsList';
 import AdminAnalytics from './pages/AdminAnalytics';
 import AdminReports from './pages/AdminReports';
 import AdminClientProfile from './pages/AdminClientProfile';
+import CreateClient from './pages/CreateClient';
+import ResetPassword from './pages/ResetPassword';
 import ClientLayout from './components/ClientLayout';
 
 // Simple Auth Guard
 const ProtectedRoute = ({ children, allowedRoles }: { children: JSX.Element, allowedRoles?: string[] }) => {
   const token = localStorage.getItem('token');
   const userRole = localStorage.getItem('role');
+  const userStr = localStorage.getItem('user');
+  const location = useLocation();
 
   if (!token) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Check for mustChangePassword
+  let user;
+  try {
+      user = userStr ? JSON.parse(userStr) : null;
+  } catch (e) {
+      user = null;
+  }
+
+  if (user && user.mustChangePassword && location.pathname !== '/reset-password') {
+      return <Navigate to="/reset-password" replace />;
+  }
+
+  // If user is trying to access reset password but doesn't need to, redirect to dashboard
+  if (user && !user.mustChangePassword && location.pathname === '/reset-password') {
+      return <Navigate to="/dashboard" replace />;
   }
 
   if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
@@ -41,14 +62,21 @@ function App() {
       <Routes>
         {/* Public Auth Routes */}
         <Route path="/login" element={<ClientLogin />} />
-        <Route path="/register" element={<ClientRegister />} />
+        {/* <Route path="/register" element={<ClientRegister />} /> */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/register" element={<AdminRegister />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         
         {/* Main Layout for all pages */}
         <Route element={<ClientLayout />}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           
+          <Route path="/reset-password" element={
+            <ProtectedRoute>
+              <ResetPassword />
+            </ProtectedRoute>
+          } />
+
           <Route path="/dashboard" element={
             <ProtectedRoute allowedRoles={['client', 'admin']}>
               <ClientDashboard />
@@ -104,6 +132,11 @@ function App() {
           <Route path="/admin/clients" element={
              <ProtectedRoute allowedRoles={['admin']}>
                <ClientsList />
+             </ProtectedRoute>
+          } />
+          <Route path="/admin/create-client" element={
+             <ProtectedRoute allowedRoles={['admin']}>
+               <CreateClient />
              </ProtectedRoute>
           } />
           <Route path="/admin/analytics" element={

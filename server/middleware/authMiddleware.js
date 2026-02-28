@@ -43,4 +43,12 @@ const adminOnly = (req, res, next) => {
   }
 };
 
-module.exports = { protect, adminOnly };
+const clientOnly = (req, res, next) => {
+  if (req.user && req.user.role === 'client') {
+    next();
+  } else {
+    return next(new AppError('Not authorized as a client', 403));
+  }
+};
+
+module.exports = { protect, adminOnly, clientOnly };

@@ -108,4 +108,35 @@ export const logout = () => {
     localStorage.removeItem("user");
 };
 
+// Admin create client
+export const createClient = async (userData: { name: string; email: string }) => {
+    const response = await api.post("/api/admin/clients", userData);
+    return response.data;
+};
+
+// Change password
+export const changePassword = async (passwords: { currentPassword: string; newPassword: string }) => {
+    const response = await api.put("/api/auth/change-password", passwords);
+    // Update local storage user if needed, or rely on next fetch
+    // But importantly, mustChangePassword should be updated.
+    // The response returns the updated user.
+    if (response.data.user) {
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+    }
+    return response.data;
+};
+
+// Reset password with token
+export const resetPassword = async (token: string, password: string) => {
+    const response = await api.put(`/api/auth/reset-password/${token}`, { password });
+    if (response.data) {
+        localStorage.setItem("token", response.data.token);
+        if (response.data.user) {
+            localStorage.setItem("role", response.data.user.role);
+            localStorage.setItem("user", JSON.stringify(response.data.user));
+        }
+    }
+    return response.data;
+};
+
 export default api;

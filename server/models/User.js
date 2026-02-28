@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
   },
   mustChangePassword: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   passwordResetToken: String,
   passwordResetExpires: Date,

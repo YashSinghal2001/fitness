@@ -27,7 +27,9 @@ const ClientLogin = () => {
 
     try {
       const data = await login(formData);
-      if (data.user.role === 'admin') {
+      if (data.user.role === 'client' && data.user.mustChangePassword) {
+        navigate('/reset-password');
+      } else if (data.user.role === 'admin') {
         navigate('/admin/clients');
       } else {
         navigate('/dashboard');

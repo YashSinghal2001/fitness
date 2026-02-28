@@ -27,13 +27,11 @@ const AdminLogin = () => {
 
     try {
       const data = await login(formData);
-      if (data.user.role === 'admin') {
+      if (data.user.role === 'client' && data.user.mustChangePassword) {
+        navigate('/reset-password');
+      } else if (data.user.role === 'admin') {
         navigate('/admin/clients');
       } else {
-        // If a client tries to login via admin login, we might want to prevent it or just redirect them to dashboard.
-        // For now, let's redirect them to dashboard but maybe show a warning?
-        // The requirement says: If role === "admin" -> /admin/clients, If role === "client" -> /dashboard.
-        // So this logic holds.
         navigate('/dashboard');
       }
     } catch (err: any) {

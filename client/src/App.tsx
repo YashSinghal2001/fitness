@@ -40,7 +40,7 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: JSX.Element, all
       user = null;
   }
 
-  if (user && user.mustChangePassword && location.pathname !== '/reset-password') {
+  if (user && user.role === 'client' && user.mustChangePassword && location.pathname !== '/reset-password') {
       return <Navigate to="/reset-password" replace />;
   }
 

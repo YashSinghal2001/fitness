@@ -38,10 +38,12 @@ const registerClient = async (req, res, next) => {
 
     if (user) {
       res.status(201).json({
-        _id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+        user: {
+          _id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
         token: generateToken(user._id),
       });
     } else {
@@ -80,10 +82,12 @@ const registerAdmin = async (req, res, next) => {
 
     if (user) {
       res.status(201).json({
-        _id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+        user: {
+          _id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
         token: generateToken(user._id),
       });
     } else {

@@ -1,5 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
+import ClientLogin from './pages/ClientLogin';
+import ClientRegister from './pages/ClientRegister';
+import AdminLogin from './pages/AdminLogin';
+import AdminRegister from './pages/AdminRegister';
 import ClientDashboard from './pages/ClientDashboard';
 import DailyTracking from './pages/DailyTracking';
 import WorkoutTracker from './pages/WorkoutTracker';
@@ -36,7 +39,11 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        {/* Public Auth Routes */}
+        <Route path="/login" element={<ClientLogin />} />
+        <Route path="/register" element={<ClientRegister />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/register" element={<AdminRegister />} />
         
         {/* Main Layout for all pages */}
         <Route element={<ClientLayout />}>

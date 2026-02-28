@@ -10,12 +10,12 @@ const {
   updateClientNutrition,
   updateClientWorkout
 } = require('../controllers/adminController');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
 router.use(protect);
-router.use(admin);
+router.use(adminOnly);
 
 router.route('/clients')
   .get(getClients)

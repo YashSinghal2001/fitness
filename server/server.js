@@ -19,6 +19,7 @@ const userRoutes = require('./routes/userRoutes');
 const goalRoutes = require('./routes/goalRoutes');
 const workoutRoutes = require('./routes/workoutRoutes');
 const progressRoutes = require('./routes/progressRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 // Controller Imports for specific route mounting
 const { getClientReports } = require('./controllers/clientController');
@@ -57,10 +58,8 @@ if (process.env.NODE_ENV === 'production') {
 
 // CORS - Must be first to handle preflight requests
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.CLIENT_URL 
-    : ['http://localhost:5173', 'http://localhost:3000'],
-  credentials: true
+  origin: process.env.CLIENT_URL || "http://localhost:5173",
+  credentials: true,
 }));
 
 // Set security HTTP headers
@@ -108,6 +107,7 @@ app.use('/api/photos', photoRoutes);
 app.use('/api/goals', goalRoutes);
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/progress', progressRoutes);
+app.use('/api/auth', authRoutes);
 
 // Custom Route Mounting to match specific requirements
 // /api/weekly -> Client Reports (Weekly Summaries)

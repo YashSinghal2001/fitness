@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5001/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5001',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -15,34 +15,32 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Auth API calls
 export const register = async (userData: any) => {
-  const response = await api.post('api/auth/register', userData);
+  const response = await api.post('/api/auth/register', userData);
   if (response.data) {
     localStorage.setItem('token', response.data.token);
-    localStorage.setItem('role', response.data.role);
-    localStorage.setItem('user', JSON.stringify(response.data));
+    localStorage.setItem('role', response.data.user.role);
+    localStorage.setItem('user', JSON.stringify(response.data.user));
   }
   return response.data;
 };
 
 export const registerAdmin = async (userData: any) => {
-  const response = await api.post('api/auth/admin/register', userData);
+  const response = await api.post('/api/auth/admin/register', userData);
   if (response.data) {
     localStorage.setItem('token', response.data.token);
-    localStorage.setItem('role', response.data.role);
-    localStorage.setItem('user', JSON.stringify(response.data));
+    localStorage.setItem('role', response.data.user.role);
+    localStorage.setItem('user', JSON.stringify(response.data.user));
   }
   return response.data;
 };
 
 export const login = async (userData: any) => {
-  const response = await api.post('/auth/login', userData);
+  const response = await api.post('/api/auth/login', userData);
   if (response.data) {
     localStorage.setItem('token', response.data.token);
     localStorage.setItem('role', response.data.user.role);

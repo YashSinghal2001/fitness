@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "http://localhost:5001",
+    baseURL: import.meta.env.VITE_API_URL,
     headers: {
         "Content-Type": "application/json",
     },
@@ -31,7 +31,7 @@ interface LoginData {
 }
 
 export const register = async (userData: RegisterData) => {
-    const response = await api.post("/api/auth/register", userData);
+    const response = await api.post("/auth/register", userData);
     if (response.data) {
         localStorage.setItem("token", response.data.token);
 
@@ -55,7 +55,7 @@ export const register = async (userData: RegisterData) => {
 };
 
 export const registerAdmin = async (userData: RegisterData) => {
-    const response = await api.post("/api/auth/admin/register", userData);
+    const response = await api.post("/auth/admin/register", userData);
     if (response.data) {
         localStorage.setItem("token", response.data.token);
 
@@ -79,7 +79,7 @@ export const registerAdmin = async (userData: RegisterData) => {
 };
 
 export const login = async (userData: LoginData) => {
-    const response = await api.post("/api/auth/login", userData);
+    const response = await api.post("/auth/login", userData);
     if (response.data) {
         localStorage.setItem("token", response.data.token);
 
@@ -103,7 +103,7 @@ export const login = async (userData: LoginData) => {
 };
 
 export const getCurrentUser = async () => {
-    const response = await api.get("/api/auth/me");
+    const response = await api.get("/auth/me");
     return response.data;
 };
 
@@ -115,13 +115,13 @@ export const logout = () => {
 
 // Admin create client
 export const createClient = async (userData: { name: string; email: string }) => {
-    const response = await api.post("/api/admin/clients", userData);
+    const response = await api.post("/admin/clients", userData);
     return response.data;
 };
 
 // Change password
 export const changePassword = async (passwords: { currentPassword: string; newPassword: string }) => {
-    const response = await api.put("/api/auth/change-password", passwords);
+    const response = await api.put("/auth/change-password", passwords);
     // Update local storage user if needed, or rely on next fetch
     // But importantly, mustChangePassword should be updated.
     // The response returns the updated user.
@@ -133,7 +133,7 @@ export const changePassword = async (passwords: { currentPassword: string; newPa
 
 // Reset password with token
 export const resetPassword = async (token: string, password: string) => {
-    const response = await api.put(`/api/auth/reset-password/${token}`, { password });
+    const response = await api.put(`/auth/reset-password/${token}`, { password });
     if (response.data) {
         localStorage.setItem("token", response.data.token);
         if (response.data.user) {

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: import.meta.env.VITE_API_URL + "/api",
     headers: {
         "Content-Type": "application/json",
     },
@@ -9,6 +9,12 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
+        // Log final request URL for validation
+        if (config.baseURL && config.url) {
+            const finalUrl = config.url.startsWith("http") ? config.url : `${config.baseURL.replace(/\/$/, "")}/${config.url.replace(/^\//, "")}`;
+            console.log(`[API Request]: ${finalUrl}`);
+        }
+
         const token = localStorage.getItem("token");
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;

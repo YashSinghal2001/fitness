@@ -68,8 +68,8 @@ const DailyTracking = () => {
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      // Use a default client ID or let the backend handle it
-      const res = await api.get(`/daily/default`);
+      // Use 'me' to let backend identify the user
+      const res = await api.get(`/daily/me`);
       setLogs(res.data.data.logs);
     } catch (error) {
       console.error('Error fetching logs:', error);
@@ -80,8 +80,8 @@ const DailyTracking = () => {
 
   useEffect(() => {
     fetchLogs();
-    api.get('/macros/plans')
-      .then(res => setTargets(res.data.dailyTarget))
+    api.get('/nutrition/me')
+      .then(res => setTargets(res.data.dailyMacroTargets))
       .catch(err => console.error('Failed to fetch targets:', err));
   }, []);
 

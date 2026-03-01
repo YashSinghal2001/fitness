@@ -159,20 +159,22 @@ const createClient = async (req, res) => {
       return;
     }
 
-    // Generate random password
-    const length = 12;
+    // Generate strong random password
+    const length = 16;
     const lower = "abcdefghijklmnopqrstuvwxyz";
     const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const numbers = "0123456789";
-    const all = lower + upper + numbers;
+    const special = "!@#$%^&*()_+~`|}{[]:;?><,./-=";
+    const all = lower + upper + numbers + special;
     
     let password = "";
     // Ensure at least one of each using crypto
     password += lower[crypto.randomInt(0, lower.length)];
     password += upper[crypto.randomInt(0, upper.length)];
     password += numbers[crypto.randomInt(0, numbers.length)];
+    password += special[crypto.randomInt(0, special.length)];
     
-    for (let i = 3; i < length; i++) {
+    for (let i = 4; i < length; i++) {
       password += all[crypto.randomInt(0, all.length)];
     }
     

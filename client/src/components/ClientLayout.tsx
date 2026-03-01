@@ -24,7 +24,7 @@ const ClientLayout = () => {
 
       <ClientSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
-      <main className="lg:ml-64 p-4 lg:p-8 w-full max-w-full overflow-x-hidden min-h-[100dvh] safe-area-bottom">
+      <main className="lg:ml-64 p-4 lg:p-8 min-h-[100dvh] safe-area-bottom">
         <Outlet />
       </main>
     </div>

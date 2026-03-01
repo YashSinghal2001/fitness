@@ -6,7 +6,7 @@
 
 @layer base {
   html, body {
-    @apply bg-background text-highlight font-body antialiased overflow-x-hidden;
+    @apply bg-background text-highlight font-body antialiased;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-sans font-bold text-highlight;

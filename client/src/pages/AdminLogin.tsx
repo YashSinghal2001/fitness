@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,7 @@ const AdminLogin = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const { email, password } = formData;
 
@@ -22,11 +24,22 @@ const AdminLogin = () => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+    
     setLoading(true);
     setError('');
 
     try {
       const data = await login(formData);
+      
+      if (!localStorage.getItem('token')) {
+        throw new Error('Authentication failed: Token not received');
+      }
+
+      if (data.user) {
+        setUser(data.user);
+      }
+
       if (data.user.role === 'client' && data.user.mustChangePassword) {
         navigate('/reset-password');
       } else if (data.user.role === 'admin') {
@@ -35,8 +48,9 @@ const AdminLogin = () => {
         navigate('/dashboard');
       }
     } catch (err: any) {
+      console.error('Admin Login error:', err);
       setError(
-        err.response?.data?.message || 'Login failed. Please check your credentials.'
+        err.response?.data?.message || err.message || 'Login failed. Please check your credentials.'
       );
     } finally {
       setLoading(false);
@@ -100,7 +114,17 @@ const AdminLogin = () => {
             disabled={loading}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
           >
-            {loading ? 'Logging In...' : 'Log In'}
+            {loading ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Logging In...
+              </span>
+            ) : (
+              'Log In'
+            )}
           </button>
         </form>
 

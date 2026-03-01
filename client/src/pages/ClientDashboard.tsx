@@ -33,12 +33,12 @@ const ClientDashboard = () => {
   if (!stats || !clientData) return <div className="text-highlight">Loading...</div>;
 
   return (
-    <div className="space-y-8">
-      <h2 className="text-3xl font-bold text-highlight">Client Dashboard</h2>
+    <div className="space-y-4 lg:space-y-8">
+      <h2 className="text-2xl lg:text-3xl font-bold text-highlight">Client Dashboard</h2>
 
       {/* Daily Overview Card */}
       <div className="card bg-gradient-to-r from-primary/20 to-secondary/10 border-primary/30">
-        <h3 className="text-xl font-bold mb-4 text-highlight">Today's Overview</h3>
+        <h3 className="text-lg lg:text-xl font-bold mb-4 text-highlight">Today's Overview</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center space-x-3">
                 <div className={`p-2 rounded-full ${clientData.todayLog ? 'bg-success/20 text-success' : 'bg-critical/20 text-critical'}`}>
@@ -71,12 +71,12 @@ const ClientDashboard = () => {
       </div>
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <div className="card border-l-4 border-primary">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-secondary text-sm">Total Workouts</p>
-              <h3 className="text-2xl mt-1 text-highlight">{stats.totalWorkouts}</h3>
+              <h3 className="text-xl lg:text-2xl mt-1 text-highlight">{stats.totalWorkouts}</h3>
             </div>
             <Activity className="text-primary" />
           </div>
@@ -85,7 +85,7 @@ const ClientDashboard = () => {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-secondary text-sm">Calories Burned</p>
-              <h3 className="text-2xl mt-1 text-highlight">{stats.totalCalories}</h3>
+              <h3 className="text-xl lg:text-2xl mt-1 text-highlight">{stats.totalCalories}</h3>
             </div>
             <Flame className="text-primary" />
           </div>
@@ -94,7 +94,7 @@ const ClientDashboard = () => {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-secondary text-sm">Total Minutes</p>
-              <h3 className="text-2xl mt-1 text-highlight">{stats.totalDuration}</h3>
+              <h3 className="text-xl lg:text-2xl mt-1 text-highlight">{stats.totalDuration}</h3>
             </div>
             <Timer className="text-primary" />
           </div>
@@ -103,7 +103,7 @@ const ClientDashboard = () => {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-secondary text-sm">Streak</p>
-              <h3 className="text-2xl mt-1 text-highlight">{stats.streak} Days</h3>
+              <h3 className="text-xl lg:text-2xl mt-1 text-highlight">{stats.streak} Days</h3>
             </div>
             <TrendingUp className="text-primary" />
           </div>
@@ -111,9 +111,9 @@ const ClientDashboard = () => {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="card h-[400px]">
-          <h3 className="text-xl mb-6 text-highlight">Recent Activity</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
+        <div className="card h-[350px] lg:h-[400px]">
+          <h3 className="text-lg lg:text-xl mb-4 lg:mb-6 text-highlight">Recent Activity</h3>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(204,204,255,0.2)" />
@@ -129,18 +129,18 @@ const ClientDashboard = () => {
         </div>
 
         {/* Recent Workouts List */}
-        <div className="card h-[400px] overflow-y-auto custom-scrollbar">
-          <h3 className="text-xl mb-6 text-highlight">Recent Workouts</h3>
+        <div className="card h-[350px] lg:h-[400px] overflow-y-auto custom-scrollbar">
+          <h3 className="text-lg lg:text-xl mb-4 lg:mb-6 text-highlight">Recent Workouts</h3>
           <div className="space-y-4">
             {recentWorkouts.map((workout: any) => (
-              <div key={workout._id} className="bg-secondary/10 p-4 rounded-lg border border-border flex justify-between items-center hover:bg-secondary/20 transition-colors">
+              <div key={workout._id} className="bg-secondary/10 p-3 lg:p-4 rounded-lg border border-border flex justify-between items-center hover:bg-secondary/20 transition-colors">
                 <div>
-                  <h4 className="font-semibold text-highlight">{workout.name}</h4>
-                  <p className="text-sm text-secondary">
+                  <h4 className="font-semibold text-highlight text-sm lg:text-base">{workout.name}</h4>
+                  <p className="text-xs lg:text-sm text-secondary">
                     {new Date(workout.workoutDate).toLocaleDateString()} • {workout.duration} min
                   </p>
                 </div>
-                <div className="text-primary font-bold">
+                <div className="text-primary font-bold text-sm lg:text-base">
                   {workout.caloriesBurned} cal
                 </div>
               </div>

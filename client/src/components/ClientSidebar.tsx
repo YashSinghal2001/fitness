@@ -1,10 +1,15 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Dumbbell, TrendingUp, Target, User, Users, BarChart2, Calendar, Utensils, Ruler, Camera, LogOut } from 'lucide-react';
+import { LayoutDashboard, Dumbbell, TrendingUp, Target, User, Users, BarChart2, Calendar, Utensils, Ruler, Camera, LogOut, X } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuth } from '../context/AuthContext';
 import { logout as apiLogout } from '../services/api';
 
-const Sidebar = () => {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
@@ -40,42 +45,68 @@ const Sidebar = () => {
   const navItems = role === 'admin' ? adminNavItems : clientNavItems;
 
   return (
-    <div className="h-screen w-64 bg-[#1E1E4B] border-r border-border flex flex-col fixed left-0 top-0">
-      <div className="p-6">
-        <h1 className="text-2xl font-bold text-highlight">GymProgress</h1>
-        <span className="text-xs text-secondary uppercase tracking-widest font-bold">Fitness SaaS</span>
-      </div>
+    <>
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm transition-opacity"
+          onClick={onClose}
+        />
+      )}
 
-      <nav className="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location.pathname === item.path;
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={clsx(
-                'flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors',
-                isActive
-                  ? 'bg-primary text-highlight shadow-soft'
-                  : 'text-secondary hover:bg-secondary/20 hover:text-highlight'
-              )}
-            >
-              <Icon size={20} className={isActive ? 'text-highlight' : 'text-secondary'} />
-              <span className="font-medium">{item.name}</span>
-            </Link>
-          );
-        })}
-        
-        <button
-          onClick={handleLogout}
-          className="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors text-secondary hover:bg-critical/20 hover:text-critical w-full text-left mt-auto"
-        >
-          <LogOut size={20} />
-          <span className="font-medium">Logout</span>
-        </button>
-      </nav>
-    </div>
+      {/* Sidebar Container */}
+      <div className={clsx(
+        "fixed inset-y-0 left-0 z-50 w-64 bg-[#1E1E4B] border-r border-border flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0",
+        isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+      )}>
+        <div className="p-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-highlight">GymProgress</h1>
+            <span className="text-xs text-secondary uppercase tracking-widest font-bold">Fitness SaaS</span>
+          </div>
+          {/* Close button for mobile */}
+          <button 
+            onClick={onClose}
+            className="lg:hidden p-2 text-secondary hover:text-highlight transition-colors"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        <nav className="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => {
+                  if (window.innerWidth < 1024) onClose();
+                }}
+                className={clsx(
+                  'flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors',
+                  isActive
+                    ? 'bg-primary text-highlight shadow-soft'
+                    : 'text-secondary hover:bg-secondary/20 hover:text-highlight'
+                )}
+              >
+                <Icon size={20} className={isActive ? 'text-highlight' : 'text-secondary'} />
+                <span className="font-medium">{item.name}</span>
+              </Link>
+            );
+          })}
+          
+          <button
+            onClick={handleLogout}
+            className="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors text-secondary hover:bg-critical/20 hover:text-critical w-full text-left mt-auto mb-6"
+          >
+            <LogOut size={20} />
+            <span className="font-medium">Logout</span>
+          </button>
+        </nav>
+      </div>
+    </>
   );
 };
 

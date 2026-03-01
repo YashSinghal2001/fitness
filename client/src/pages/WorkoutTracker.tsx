@@ -36,13 +36,13 @@ const WorkoutTracker = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <h2 className="text-3xl font-bold text-highlight">Log Workout</h2>
+    <div className="max-w-4xl mx-auto space-y-4 lg:space-y-8">
+      <h2 className="text-2xl lg:text-3xl font-bold text-highlight">Log Workout</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Workout Details */}
         <div className="card space-y-4">
-          <h3 className="text-xl font-semibold mb-4 text-highlight">Session Details</h3>
+          <h3 className="text-lg lg:text-xl font-semibold mb-4 text-highlight">Session Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1 text-secondary">Workout Name</label>
@@ -68,7 +68,7 @@ const WorkoutTracker = () => {
         {/* Exercises */}
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-semibold text-highlight">Exercises</h3>
+            <h3 className="text-lg lg:text-xl font-semibold text-highlight">Exercises</h3>
             <button
               type="button"
               onClick={() => append({ name: '', sets: 0, reps: 0, weight: 0, notes: '' })}
@@ -84,7 +84,7 @@ const WorkoutTracker = () => {
               <button
                 type="button"
                 onClick={() => remove(index)}
-                className="absolute top-4 right-4 text-secondary hover:text-critical transition-colors opacity-0 group-hover:opacity-100"
+                className="absolute top-4 right-4 text-secondary hover:text-critical transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
               >
                 <Trash2 size={20} />
               </button>

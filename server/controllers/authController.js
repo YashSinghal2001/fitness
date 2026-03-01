@@ -7,7 +7,7 @@ const AppError = require('../utils/AppError');
 // Generate JWT
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '7d',
+    expiresIn: '1h',
   });
 };
 
@@ -74,9 +74,25 @@ const loginUser = async (req, res, next) => {
     }
 
     // Check for user email
-    const user = await User.findOne({ email });
+    // Explicitly use lean(false) as requested, though it is default for Mongoose queries unless .lean() is called
+    const user = await User.findOne({ email }).lean(false);
 
-    if (user && (await user.matchPassword(password))) {
+    if (user) {
+      console.log(`User found: ${user.email}`);
+    } else {
+      console.log(`User not found for email: ${email}`);
+    }
+
+    // Manual bcrypt comparison as requested to avoid any double-hashing issues
+    // Using bcrypt.compare(plainText, hash)
+    let isMatch = false;
+    if (user) {
+      isMatch = await bcrypt.compare(password, user.password);
+      console.log(`Password match result: ${isMatch}`);
+      console.log(`mustChangePassword status: ${user.mustChangePassword}`);
+    }
+
+    if (user && isMatch) {
       // Check if user must change password
       if (user.mustChangePassword) {
         return res.json({
@@ -86,6 +102,11 @@ const loginUser = async (req, res, next) => {
         });
       }
 
+      // Optimize JWT: reduce payload (already minimal) and use short expiration
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: '1h',
+      });
+
       res.json({
         user: {
           _id: user.id,
@@ -94,7 +115,7 @@ const loginUser = async (req, res, next) => {
           role: user.role,
           mustChangePassword: user.mustChangePassword,
         },
-        token: generateToken(user._id),
+        token: token,
       });
     } else {
       return next(new AppError('Invalid credentials', 401));

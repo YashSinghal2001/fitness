@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const crypto = require('crypto');
 const DailyLog = require('../models/DailyLog');
 const NutritionPlan = require('../models/NutritionPlan');
 const WorkoutPlan = require('../models/WorkoutPlan');
@@ -148,7 +149,7 @@ const updateClientWorkout = async (req, res) => {
 // @route   POST /api/admin/clients
 // @access  Private (Admin)
 const createClient = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email } = req.body;
 
   try {
     const userExists = await User.findOne({ email });
@@ -157,6 +158,26 @@ const createClient = async (req, res) => {
       res.status(400).json({ message: 'User already exists' });
       return;
     }
+
+    // Generate random password
+    const length = 12;
+    const lower = "abcdefghijklmnopqrstuvwxyz";
+    const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const numbers = "0123456789";
+    const all = lower + upper + numbers;
+    
+    let password = "";
+    // Ensure at least one of each using crypto
+    password += lower[crypto.randomInt(0, lower.length)];
+    password += upper[crypto.randomInt(0, upper.length)];
+    password += numbers[crypto.randomInt(0, numbers.length)];
+    
+    for (let i = 3; i < length; i++) {
+      password += all[crypto.randomInt(0, all.length)];
+    }
+    
+    // Shuffle password
+    password = password.split('').sort(() => 0.5 - Math.random()).join('');
 
     const user = await User.create({
       name,
@@ -170,13 +191,9 @@ const createClient = async (req, res) => {
 
     res.status(201).json({
       message: "Client created successfully",
-      client: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        isActive: user.isActive
-      }
+      clientId: user._id,
+      email: user.email,
+      generatedPassword: password // Return plain text password only once
     });
   } catch (error) {
     console.error(error);

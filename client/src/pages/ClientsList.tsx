@@ -128,7 +128,7 @@ const ClientsList = () => {
 
       {/* Desktop Table View */}
       <div className="hidden md:block bg-surface rounded-lg p-6 shadow-lg border border-gray-800">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto w-full">
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-gray-700">

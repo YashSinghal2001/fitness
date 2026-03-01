@@ -75,7 +75,7 @@ const ProgressAnalytics = () => {
           </button>
         </div>
         
-        <div className="card overflow-x-auto p-0">
+        <div className="card overflow-x-auto p-0 w-full">
           <table className="w-full min-w-[800px]">
             <thead>
               <tr>

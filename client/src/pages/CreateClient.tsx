@@ -6,13 +6,14 @@ const CreateClient = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const { name, email } = formData;
+  const { name, email, password } = formData;
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prevState) => ({
@@ -30,7 +31,7 @@ const CreateClient = () => {
     try {
       const data = await createClient(formData);
       setSuccess(data.message);
-      setFormData({ name: '', email: '' });
+      setFormData({ name: '', email: '', password: '' });
     } catch (err: any) {
       setError(
         err.response?.data?.message || 'Failed to create client. Please try again.'
@@ -56,7 +57,6 @@ const CreateClient = () => {
         {success && (
           <div className="bg-green-500/20 border border-green-500 text-highlight px-4 py-2 rounded mb-4 text-center">
             <p className="font-bold">{success}</p>
-            <p className="text-sm text-muted mt-1">An email has been sent to the client with their login details.</p>
           </div>
         )}
 
@@ -96,6 +96,26 @@ const CreateClient = () => {
               required
               className="mt-1 block w-full px-3 py-2 bg-background border border-border rounded-md text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="john@example.com"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-highlight"
+            >
+              Password
+            </label>
+            <input
+              type="text"
+              id="password"
+              name="password"
+              value={password}
+              onChange={onChange}
+              required
+              minLength={6}
+              className="mt-1 block w-full px-3 py-2 bg-background border border-border rounded-md text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="Set initial password"
             />
           </div>
 

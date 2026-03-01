@@ -4,8 +4,6 @@ const NutritionPlan = require('../models/NutritionPlan');
 const WorkoutPlan = require('../models/WorkoutPlan');
 const Goal = require('../models/Goal');
 
-const sendEmail = require('../utils/email');
-
 // @desc    Get all clients for the logged in admin
 // @route   GET /api/admin/clients
 // @access  Private (Admin)
@@ -150,7 +148,7 @@ const updateClientWorkout = async (req, res) => {
 // @route   POST /api/admin/clients
 // @access  Private (Admin)
 const createClient = async (req, res) => {
-  const { name, email } = req.body;
+  const { name, email, password } = req.body;
 
   try {
     const userExists = await User.findOne({ email });
@@ -160,56 +158,26 @@ const createClient = async (req, res) => {
       return;
     }
 
-    // Generate temporary random password (10 chars)
-    const temporaryPassword = Math.random().toString(36).slice(-10);
-
     const user = await User.create({
       name,
       email,
-      password: temporaryPassword, // Password will be hashed by model pre-save
+      password, // Password will be hashed by model pre-save
       role: 'client',
       coach: req.user._id,
-      mustChangePassword: true,
+      isActive: true,
+      mustChangePassword: false,
     });
 
-    // Generate reset token
-    const resetToken = user.createPasswordResetToken();
-    await user.save({ validateBeforeSave: false });
-
-    // Send email
-    // Use FRONTEND_URL from env, or fallback to request origin if not available
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    const resetLink = `${frontendUrl}/reset-password/${resetToken}`;
-
-    const message = `
-      You have been invited to the Fitness App.
-      
-      Your temporary password is: ${temporaryPassword}
-      
-      Please verify your account and set a new password by clicking the link below:
-      ${resetLink}
-      
-      This link is valid for 30 minutes.
-    `;
-
-    try {
-      await sendEmail({
+    res.status(201).json({
+      message: "Client created successfully",
+      client: {
+        _id: user._id,
+        name: user.name,
         email: user.email,
-        subject: 'Welcome to Fitness App - Set Your Password',
-        message,
-      });
-
-      // Return only success message, NOT the password
-      res.status(201).json({
-        message: "Client created and email sent successfully",
-      });
-    } catch (err) {
-      user.passwordResetToken = undefined;
-      user.passwordResetExpires = undefined;
-      await user.save({ validateBeforeSave: false });
-
-      return res.status(500).json({ message: 'Client created but email failed to send. Please reset password manually.' });
-    }
+        role: user.role,
+        isActive: user.isActive
+      }
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });

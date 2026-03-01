@@ -7,7 +7,7 @@ const ClientsList = () => {
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddClient, setShowAddClient] = useState(false);
-  const [newClient, setNewClient] = useState({ name: '', email: '' });
+  const [newClient, setNewClient] = useState({ name: '', email: '', password: '' });
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -41,8 +41,8 @@ const ClientsList = () => {
       setMessage(null);
       try {
           await createClient(newClient);
-          setMessage({ type: 'success', text: 'Client added successfully. Email sent.' });
-          setNewClient({ name: '', email: '' });
+          setMessage({ type: 'success', text: 'Client added successfully.' });
+          setNewClient({ name: '', email: '', password: '' });
           setShowAddClient(false);
           fetchClients(); // Refresh list
       } catch (error: any) {
@@ -103,6 +103,18 @@ const ClientsList = () => {
                               value={newClient.email}
                               onChange={(e) => setNewClient({...newClient, email: e.target.value})}
                               className="w-full bg-background border border-gray-700 rounded-lg p-2 text-highlight focus:outline-none focus:border-primary"
+                          />
+                      </div>
+                      <div>
+                          <label className="block text-sm font-medium text-secondary mb-1">Password</label>
+                          <input 
+                              type="text" 
+                              required
+                              minLength={6}
+                              value={newClient.password}
+                              onChange={(e) => setNewClient({...newClient, password: e.target.value})}
+                              className="w-full bg-background border border-gray-700 rounded-lg p-2 text-highlight focus:outline-none focus:border-primary"
+                              placeholder="Set initial password"
                           />
                       </div>
                       <div className="pt-4">

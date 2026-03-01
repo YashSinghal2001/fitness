@@ -120,7 +120,7 @@ export const logout = () => {
 };
 
 // Admin create client
-export const createClient = async (userData: { name: string; email: string }) => {
+export const createClient = async (userData: { name: string; email: string; password?: string }) => {
     const response = await api.post("/admin/clients", userData);
     return response.data;
 };
@@ -137,9 +137,15 @@ export const changePassword = async (passwords: { currentPassword: string; newPa
     return response.data;
 };
 
+// Forgot password
+export const forgotPassword = async (email: string) => {
+    const response = await api.post("/auth/forgot-password", { email });
+    return response.data;
+};
+
 // Reset password with token
 export const resetPassword = async (token: string, password: string) => {
-    const response = await api.put(`/auth/reset-password/${token}`, { password });
+    const response = await api.post("/auth/reset-password", { token, password });
     if (response.data) {
         localStorage.setItem("token", response.data.token);
         if (response.data.user) {

@@ -1,17 +1,27 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { login } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { changeInitialPassword } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
-const ClientLogin = () => {
+const SetNewPassword = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    newPassword: '',
+    confirmNewPassword: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { refreshUser } = useAuth();
+  const userId = location.state?.userId;
 
-  const { email, password } = formData;
+  useEffect(() => {
+    if (!userId) {
+      navigate('/login');
+    }
+  }, [userId, navigate]);
+
+  const { newPassword, confirmNewPassword } = formData;
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prevState) => ({
@@ -25,24 +35,25 @@ const ClientLogin = () => {
     setLoading(true);
     setError('');
 
+    if (newPassword !== confirmNewPassword) {
+      setError('New passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setError('Password must be at least 6 characters');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const data = await login(formData);
-
-      if (data.requirePasswordChange) {
-        navigate('/set-new-password', { state: { userId: data.userId } });
-        return;
-      }
-
-      if (data.user.role === 'client' && data.user.mustChangePassword) {
-        navigate('/set-new-password', { state: { userId: data.user._id } });
-      } else if (data.user.role === 'admin') {
-        navigate('/admin/clients');
-      } else {
-        navigate('/dashboard');
-      }
+      await changeInitialPassword({ userId, newPassword });
+      await refreshUser();
+      navigate('/dashboard');
     } catch (err: any) {
       setError(
-        err.response?.data?.message || 'Login failed. Please check your credentials.'
+        err.response?.data?.message || 'Failed to update password. Please try again.'
       );
     } finally {
       setLoading(false);
@@ -53,8 +64,11 @@ const ClientLogin = () => {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="max-w-md w-full bg-surface p-8 rounded-lg shadow-glow border border-border">
         <h2 className="text-3xl font-bold text-center text-highlight mb-6">
-          Client Login
+          Set New Password
         </h2>
+        <p className="text-center text-muted mb-6">
+          Please set a new password for your account to continue.
+        </p>
 
         {error && (
           <div className="bg-critical/20 border border-critical text-highlight px-4 py-2 rounded mb-4 text-center">
@@ -65,66 +79,38 @@ const ClientLogin = () => {
         <form onSubmit={onSubmit} className="space-y-6">
           <div>
             <label
-              htmlFor="email"
+              htmlFor="newPassword"
               className="block text-sm font-medium text-highlight"
             >
-              Email Address
+              New Password
             </label>
             <input
-              type="email"
-              id="email"
-              name="email"
-              value={email}
-              onChange={onChange}
+              type="password"
+              id="newPassword"
+              name="newPassword"
+              value={newPassword}
+              onChange={(e) => onChange(e)}
               required
               className="mt-1 block w-full px-3 py-2 bg-background border border-border rounded-md text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="john@example.com"
             />
           </div>
 
           <div>
             <label
-              htmlFor="password"
+              htmlFor="confirmNewPassword"
               className="block text-sm font-medium text-highlight"
             >
-              Password
+              Confirm New Password
             </label>
             <input
               type="password"
-              id="password"
-              name="password"
-              value={password}
-              onChange={onChange}
+              id="confirmNewPassword"
+              name="confirmNewPassword"
+              value={confirmNewPassword}
+              onChange={(e) => onChange(e)}
               required
               className="mt-1 block w-full px-3 py-2 bg-background border border-border rounded-md text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="••••••••"
             />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-              />
-              <label
-                htmlFor="remember-me"
-                className="ml-2 block text-sm text-highlight"
-              >
-                Remember me
-              </label>
-            </div>
-
-            <div className="text-sm">
-              <Link
-                to="/forgot-password"
-                className="font-medium text-primary hover:text-primary/80"
-              >
-                Forgot your password?
-              </Link>
-            </div>
           </div>
 
           <button
@@ -132,7 +118,7 @@ const ClientLogin = () => {
             disabled={loading}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
           >
-            {loading ? 'Logging In...' : 'Log In'}
+            {loading ? 'Setting Password...' : 'Set Password'}
           </button>
         </form>
       </div>
@@ -140,4 +126,4 @@ const ClientLogin = () => {
   );
 };
 
-export default ClientLogin;
+export default SetNewPassword;

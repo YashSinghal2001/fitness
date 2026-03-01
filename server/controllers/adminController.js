@@ -188,7 +188,7 @@ const createClient = async (req, res) => {
       role: 'client',
       coach: req.user._id,
       isActive: true,
-      mustChangePassword: false,
+      mustChangePassword: true,
     });
 
     res.status(201).json({

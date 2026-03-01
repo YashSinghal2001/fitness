@@ -77,6 +77,15 @@ const loginUser = async (req, res, next) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
+      // Check if user must change password
+      if (user.mustChangePassword) {
+        return res.json({
+          success: true,
+          requirePasswordChange: true,
+          userId: user._id
+        });
+      }
+
       res.json({
         user: {
           _id: user.id,
@@ -90,6 +99,44 @@ const loginUser = async (req, res, next) => {
     } else {
       return next(new AppError('Invalid credentials', 401));
     }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Change initial password
+// @route   POST /api/auth/change-initial-password
+// @access  Public
+const changeInitialPassword = async (req, res, next) => {
+  try {
+    const { userId, newPassword } = req.body;
+
+    if (!userId || !newPassword) {
+      return next(new AppError('Please provide user ID and new password', 400));
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return next(new AppError('User not found', 404));
+    }
+
+    // Update password
+    user.password = newPassword;
+    user.mustChangePassword = false;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      user: {
+        _id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        mustChangePassword: user.mustChangePassword,
+      },
+      token: generateToken(user._id),
+    });
   } catch (error) {
     next(error);
   }
@@ -246,6 +293,7 @@ module.exports = {
   registerAdmin,
   loginUser,
   getMe,
+  changeInitialPassword,
   changePassword,
   resetPassword,
   forgotPassword,

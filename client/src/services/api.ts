@@ -86,6 +86,11 @@ export const registerAdmin = async (userData: RegisterData) => {
 
 export const login = async (userData: LoginData) => {
     const response = await api.post("/auth/login", userData);
+
+    if (response.data.requirePasswordChange) {
+        return response.data;
+    }
+
     if (response.data) {
         localStorage.setItem("token", response.data.token);
 
@@ -103,6 +108,18 @@ export const login = async (userData: LoginData) => {
             };
             localStorage.setItem("role", response.data.role);
             localStorage.setItem("user", JSON.stringify(user));
+        }
+    }
+    return response.data;
+};
+
+export const changeInitialPassword = async (data: { userId: string; newPassword: string }) => {
+    const response = await api.post("/auth/change-initial-password", data);
+    if (response.data) {
+        localStorage.setItem("token", response.data.token);
+        if (response.data.user) {
+            localStorage.setItem("role", response.data.user.role);
+            localStorage.setItem("user", JSON.stringify(response.data.user));
         }
     }
     return response.data;

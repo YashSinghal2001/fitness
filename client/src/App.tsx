@@ -19,6 +19,7 @@ import AdminReports from './pages/AdminReports';
 import AdminClientProfile from './pages/AdminClientProfile';
 import CreateClient from './pages/CreateClient';
 import ResetPassword from './pages/ResetPassword';
+import SetNewPassword from './pages/SetNewPassword';
 import ForgotPassword from './pages/ForgotPassword';
 import ClientLayout from './components/ClientLayout';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -69,6 +70,7 @@ function App() {
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/register" element={<AdminRegister />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/set-new-password" element={<SetNewPassword />} />
           {/* Keep this for legacy email links if any, though we removed email sending */}
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           

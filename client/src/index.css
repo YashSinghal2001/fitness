@@ -15,7 +15,6 @@
     /* Safari 100vh fix */
     min-height: 100vh;
     height: -webkit-fill-available;
-    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {

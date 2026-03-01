@@ -7,7 +7,7 @@ const ClientLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background text-highlight font-sans overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen bg-background text-highlight font-sans">
       <ClientSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       {/* Mobile Header */}

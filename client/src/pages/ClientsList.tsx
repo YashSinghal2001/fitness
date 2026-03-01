@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Utensils, User, Plus } from 'lucide-react';
+import { Utensils, User, Plus, X } from 'lucide-react';
 import api, { createClient } from '../services/api';
-import Modal from '../components/Modal';
 
 const ClientsList = () => {
   const [clients, setClients] = useState<any[]>([]);
@@ -53,15 +52,15 @@ const ClientsList = () => {
       }
   };
 
-  if (loading) return <div className="p-6 text-center text-secondary">Loading...</div>;
+  if (loading) return <div>Loading...</div>;
 
   return (
-    <div className="relative">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-primary">Clients</h1>
+    <div className="p-6 relative">
+      <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-primary">Clients</h1>
           <button 
             onClick={() => setShowAddClient(true)}
-            className="w-full md:w-auto bg-primary text-white px-4 py-3 md:py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-primary/90 transition-colors shadow-soft"
+            className="bg-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-primary/90 transition-colors"
           >
               <Plus size={20} />
               <span>Add Client</span>
@@ -74,60 +73,65 @@ const ClientsList = () => {
           </div>
       )}
 
-      <Modal
-        isOpen={showAddClient}
-        onClose={() => setShowAddClient(false)}
-        title="Add New Client"
-      >
-        <form onSubmit={handleAddClient} className="space-y-4">
-            <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Name</label>
-                <input 
-                    type="text" 
-                    required
-                    value={newClient.name}
-                    onChange={(e) => setNewClient({...newClient, name: e.target.value})}
-                    className="input-field"
-                    placeholder="John Doe"
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Email</label>
-                <input 
-                    type="email" 
-                    required
-                    value={newClient.email}
-                    onChange={(e) => setNewClient({...newClient, email: e.target.value})}
-                    className="input-field"
-                    placeholder="john@example.com"
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Password</label>
-                <input 
-                    type="text" 
-                    required
-                    minLength={6}
-                    value={newClient.password}
-                    onChange={(e) => setNewClient({...newClient, password: e.target.value})}
-                    className="input-field"
-                    placeholder="Set initial password"
-                />
-            </div>
-            <div className="pt-4">
-                <button 
-                    type="submit" 
-                    disabled={submitting}
-                    className="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-primary/90 disabled:opacity-50 transition-all"
-                >
-                    {submitting ? 'Adding...' : 'Add Client'}
-                </button>
-            </div>
-        </form>
-      </Modal>
+      {/* Add Client Modal */}
+      {showAddClient && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-surface p-6 rounded-lg w-full max-w-md border border-gray-800 shadow-xl relative">
+                  <button 
+                      onClick={() => setShowAddClient(false)}
+                      className="absolute top-4 right-4 text-secondary hover:text-white"
+                  >
+                      <X size={24} />
+                  </button>
+                  <h2 className="text-2xl font-bold mb-6 text-highlight">Add New Client</h2>
+                  <form onSubmit={handleAddClient} className="space-y-4">
+                      <div>
+                          <label className="block text-sm font-medium text-secondary mb-1">Name</label>
+                          <input 
+                              type="text" 
+                              required
+                              value={newClient.name}
+                              onChange={(e) => setNewClient({...newClient, name: e.target.value})}
+                              className="w-full bg-background border border-gray-700 rounded-lg p-2 text-highlight focus:outline-none focus:border-primary"
+                          />
+                      </div>
+                      <div>
+                          <label className="block text-sm font-medium text-secondary mb-1">Email</label>
+                          <input 
+                              type="email" 
+                              required
+                              value={newClient.email}
+                              onChange={(e) => setNewClient({...newClient, email: e.target.value})}
+                              className="w-full bg-background border border-gray-700 rounded-lg p-2 text-highlight focus:outline-none focus:border-primary"
+                          />
+                      </div>
+                      <div>
+                          <label className="block text-sm font-medium text-secondary mb-1">Password</label>
+                          <input 
+                              type="text" 
+                              required
+                              minLength={6}
+                              value={newClient.password}
+                              onChange={(e) => setNewClient({...newClient, password: e.target.value})}
+                              className="w-full bg-background border border-gray-700 rounded-lg p-2 text-highlight focus:outline-none focus:border-primary"
+                              placeholder="Set initial password"
+                          />
+                      </div>
+                      <div className="pt-4">
+                          <button 
+                              type="submit" 
+                              disabled={submitting}
+                              className="w-full bg-primary text-white py-2 rounded-lg font-semibold hover:bg-primary/90 disabled:opacity-50"
+                          >
+                              {submitting ? 'Adding...' : 'Add Client'}
+                          </button>
+                      </div>
+                  </form>
+              </div>
+          </div>
+      )}
 
-      {/* Desktop Table View */}
-      <div className="hidden md:block bg-surface rounded-lg p-6 shadow-lg border border-gray-800">
+      <div className="bg-surface rounded-lg p-6 shadow-lg border border-gray-800">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
@@ -167,7 +171,7 @@ const ClientsList = () => {
                           title="View Profile"
                       >
                           <User size={18} />
-                          <span className="text-sm">Profile</span>
+                          <span className="text-sm hidden md:inline">Profile</span>
                       </Link>
                       <Link 
                           to={`/admin/clients/${client._id}/nutrition`}
@@ -175,7 +179,7 @@ const ClientsList = () => {
                           title="Nutrition Plan"
                       >
                           <Utensils size={18} />
-                          <span className="text-sm">Plan</span>
+                          <span className="text-sm hidden md:inline">Plan</span>
                       </Link>
                     </div>
                   </td>
@@ -191,58 +195,6 @@ const ClientsList = () => {
             </tbody>
           </table>
         </div>
-      </div>
-
-      {/* Mobile Card View */}
-      <div className="md:hidden space-y-4">
-        {clients.map((client) => (
-          <div key={client._id} className="bg-surface rounded-lg p-4 shadow-md border border-gray-800">
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <h3 className="text-lg font-bold text-highlight">{client.name}</h3>
-                <p className="text-sm text-secondary">{client.email}</p>
-              </div>
-              {client.mustChangePassword ? (
-                  <span className="px-2 py-1 rounded text-xs bg-yellow-500/20 text-yellow-500 whitespace-nowrap">
-                      Reset
-                  </span>
-              ) : (
-                  <button 
-                      onClick={() => toggleStatus(client._id, client.isActive)}
-                      className={`px-2 py-1 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap ${client.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}
-                  >
-                      {client.isActive ? 'Active' : 'Inactive'}
-                  </button>
-              )}
-            </div>
-            
-            <div className="flex items-center text-xs text-secondary mb-4">
-              <span>Joined: {new Date(client.createdAt).toLocaleDateString()}</span>
-            </div>
-
-            <div className="flex space-x-2 border-t border-gray-800 pt-3">
-              <Link 
-                  to={`/admin/clients/${client._id}`}
-                  className="flex-1 flex items-center justify-center space-x-2 py-2 bg-secondary/10 rounded-lg text-primary hover:bg-secondary/20 transition-colors"
-              >
-                  <User size={16} />
-                  <span className="text-sm">Profile</span>
-              </Link>
-              <Link 
-                  to={`/admin/clients/${client._id}/nutrition`}
-                  className="flex-1 flex items-center justify-center space-x-2 py-2 bg-secondary/10 rounded-lg text-secondary hover:text-white hover:bg-secondary/20 transition-colors"
-              >
-                  <Utensils size={16} />
-                  <span className="text-sm">Plan</span>
-              </Link>
-            </div>
-          </div>
-        ))}
-        {clients.length === 0 && (
-            <div className="p-8 text-center text-secondary bg-surface rounded-lg border border-gray-800">
-                No clients found. Add one to get started.
-            </div>
-        )}
       </div>
     </div>
   );

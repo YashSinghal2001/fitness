@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createClient } from '../services/api';
-import { Copy, Share2, Check } from 'lucide-react';
-import Modal from '../components/Modal';
+import { Copy, Share2, Check, X } from 'lucide-react';
 
 const CreateClient = () => {
   const [formData, setFormData] = useState({
@@ -74,20 +73,20 @@ const CreateClient = () => {
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto p-4 md:p-8">
-      <div className="bg-surface p-6 md:p-8 rounded-lg shadow-glow border border-border">
-        <h2 className="text-2xl md:text-3xl font-bold text-center text-highlight mb-6">
+    <div className="min-h-screen bg-background p-8 relative">
+      <div className="max-w-md mx-auto bg-surface p-8 rounded-lg shadow-glow border border-border">
+        <h2 className="text-3xl font-bold text-center text-highlight mb-6">
           Create New Client
         </h2>
 
         {error && (
-          <div className="bg-critical/20 border border-critical text-highlight px-4 py-2 rounded mb-4 text-center text-sm">
+          <div className="bg-critical/20 border border-critical text-highlight px-4 py-2 rounded mb-4 text-center">
             {error}
           </div>
         )}
 
         {success && !createdClient && (
-           <div className="bg-green-500/20 border border-green-500 text-highlight px-4 py-2 rounded mb-4 text-center text-sm">
+           <div className="bg-green-500/20 border border-green-500 text-highlight px-4 py-2 rounded mb-4 text-center">
             <p className="font-bold">{success}</p>
           </div>
         )}
@@ -96,7 +95,7 @@ const CreateClient = () => {
           <div>
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-highlight mb-1"
+              className="block text-sm font-medium text-highlight"
             >
               Client Name
             </label>
@@ -107,7 +106,7 @@ const CreateClient = () => {
               value={name}
               onChange={onChange}
               required
-              className="input-field"
+              className="mt-1 block w-full px-3 py-2 bg-background border border-border rounded-md text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="John Doe"
             />
           </div>
@@ -115,7 +114,7 @@ const CreateClient = () => {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-highlight mb-1"
+              className="block text-sm font-medium text-highlight"
             >
               Email Address
             </label>
@@ -126,7 +125,7 @@ const CreateClient = () => {
               value={email}
               onChange={onChange}
               required
-              className="input-field"
+              className="mt-1 block w-full px-3 py-2 bg-background border border-border rounded-md text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="john@example.com"
             />
           </div>
@@ -134,7 +133,7 @@ const CreateClient = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full btn-primary"
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
           >
             {loading ? 'Creating Client...' : 'Create Client'}
           </button>
@@ -151,21 +150,24 @@ const CreateClient = () => {
       </div>
 
       {/* Success Modal */}
-      <Modal
-        isOpen={!!createdClient}
-        onClose={() => setCreatedClient(null)}
-        title="Success!"
-        maxWidth="md"
-      >
-        {createdClient && (
-          <>
+      {createdClient && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-surface border border-border rounded-lg shadow-2xl p-6 w-full max-w-md m-4 relative animate-in fade-in zoom-in duration-300">
+            <button 
+              onClick={() => setCreatedClient(null)}
+              className="absolute top-4 right-4 text-muted hover:text-white"
+            >
+              <X size={20} />
+            </button>
+
+            <h3 className="text-2xl font-bold text-highlight mb-2 text-center">Success!</h3>
             <p className="text-muted text-center mb-6">Client created successfully. Share these credentials securely.</p>
 
             <div className="space-y-4">
               <div className="bg-background p-4 rounded-md border border-border">
                 <label className="text-xs text-muted uppercase tracking-wider block mb-1">Email</label>
                 <div className="flex items-center justify-between">
-                  <span className="text-white font-mono break-all text-sm md:text-base">{createdClient.email}</span>
+                  <span className="text-white font-mono break-all">{createdClient.email}</span>
                   <button 
                     onClick={() => copyToClipboard(createdClient.email, 'email')}
                     className="p-2 hover:bg-surface rounded-full transition-colors ml-2 text-primary"
@@ -179,7 +181,7 @@ const CreateClient = () => {
               <div className="bg-background p-4 rounded-md border border-border">
                 <label className="text-xs text-muted uppercase tracking-wider block mb-1">Password</label>
                 <div className="flex items-center justify-between">
-                  <span className="text-white font-mono break-all text-sm md:text-base">{createdClient.generatedPassword}</span>
+                  <span className="text-white font-mono break-all">{createdClient.generatedPassword}</span>
                   <button 
                     onClick={() => copyToClipboard(createdClient.generatedPassword, 'password')}
                     className="p-2 hover:bg-surface rounded-full transition-colors ml-2 text-primary"
@@ -191,24 +193,24 @@ const CreateClient = () => {
               </div>
             </div>
 
-            <div className="mt-8 flex flex-col md:flex-row gap-3">
+            <div className="mt-8 flex gap-3">
               <button
                 onClick={shareOnWhatsApp}
-                className="flex-1 flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white py-2 px-4 rounded-md transition-colors min-h-[44px]"
+                className="flex-1 flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white py-2 px-4 rounded-md transition-colors"
               >
                 <Share2 size={18} />
                 WhatsApp
               </button>
               <button
                 onClick={() => setCreatedClient(null)}
-                className="flex-1 bg-primary hover:bg-opacity-90 text-white py-2 px-4 rounded-md transition-colors min-h-[44px]"
+                className="flex-1 bg-primary hover:bg-opacity-90 text-white py-2 px-4 rounded-md transition-colors"
               >
                 Done
               </button>
             </div>
-          </>
-        )}
-      </Modal>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
